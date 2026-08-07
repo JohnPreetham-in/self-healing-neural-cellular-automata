@@ -48,7 +48,7 @@ The model should learn to:
 
 ## Core Architecture
 
-Each cell in the simulation contains a **16-dimensional state vector**.
+Each cell in the simulation contains a **16-dimensional state vector** on a default **32 × 32** grid.
 
 ### Visible Channels
 
@@ -58,7 +58,7 @@ Each cell in the simulation contains a **16-dimensional state vector**.
 | 1 | Dermis |
 | 2 | Vasculature |
 
-These three channels are rendered as RGB for visualization.
+These three channels form the visible RGB target representation.
 
 ### Hidden Channels
 
@@ -75,14 +75,17 @@ Seed Cell
     │
     ▼
 Perception Layer
-(Identity + Sobel Filters)
+(Identity + Sobel X + Sobel Y)
     │
     ▼
-Small Neural Network
+Shared Neural Network
 (1×1 Convolutions)
     │
     ▼
-Residual Update
+Stochastic Residual Update
+    │
+    ▼
+Alive Mask
     │
     ▼
 Updated Cell State
@@ -92,19 +95,22 @@ Every cell executes the same neural network independently.
 
 ---
 
-## Key Features
+## Implemented Infrastructure
 
-- Neural Cellular Automata
-- PyTorch implementation
-- Sobel-based local perception
-- Residual state updates
-- Stochastic asynchronous updates
-- Backpropagation Through Time (BPTT)
-- Morphogenesis
-- Tissue regeneration
-- Self-healing simulation
-- GIF and MP4 visualization
-- Healing evaluation metrics
+- YAML configuration loading with immutable nested values
+- CPU/CUDA/Apple MPS device selection
+- Python, NumPy, PyTorch, and CUDA seeding
+- Reusable logging and filesystem utilities
+- PNG target loading, RGB conversion, resizing, normalization, and validation
+- Canonical seed/state initialization and state validation
+- Identity, Sobel X, and Sobel Y local perception
+- Shared 1×1 convolutional update rule
+- Residual updates, stochastic asynchronous updates, and alive masking
+- BPTT rollout training with MSE reconstruction loss
+- Adam optimizer and optional learning-rate scheduling
+- Sample pooling and checkpoint save/load
+
+Visualization, evaluation, damage/healing scenarios, and CLI entry points remain future milestones.
 
 ---
 
@@ -113,18 +119,19 @@ Every cell executes the same neural network independently.
 ```text
 self-healing-neural-cellular-automata/
 
-├── assets/
-├── checkpoints/
-├── configs/
-├── data/
-├── docs/
-├── notebooks/
-├── outputs/
-├── scripts/
+├── checkpoints/       # Ignored model artifacts
+├── configs/           # YAML experiment configuration
+├── docs/              # Project documentation
+├── outputs/           # Ignored runtime artifacts
+├── scripts/           # Future command-line entry points
 ├── src/
-├── tests/
-├── todo.md
-├── claude.md
+│   ├── data/          # Target loading and preprocessing
+│   ├── model/         # NCA computational core
+│   ├── simulation/    # Seed/state initialization
+│   ├── training/      # Training pipeline
+│   └── utils/         # Shared infrastructure
+├── tests/             # Isolated tests
+├── PROJECT_CONTEXT.md # Canonical workspace-local specification
 └── README.md
 ```
 
@@ -150,41 +157,61 @@ self-healing-neural-cellular-automata/
 - OpenCV
 - SciPy
 - tqdm
+- PyYAML
+
+---
+
+## Configuration
+
+Use the YAML files in `configs/` as the source of truth for model shape, rollout length, batch size, optimizer, loss, scheduler, pool, paths, seed, and logging settings.
+
+Resolved configurations should be preserved with experiment artifacts. Do not place tunable hyperparameters in source code.
 
 ---
 
 ## Planned Workflow
 
-### Phase 1
+### Phase 1 — Repository and Configuration
 
-- Build Neural Cellular Automata model
-- Implement perception layer
-- Add stochastic updates
+- Repository structure and engineering conventions
+- YAML configuration, device management, reproducibility, logging, and I/O
 
-### Phase 2
+### Phase 2 — Target and State Representation
 
+- Target image preprocessing
 - Seed initialization
-- Growth simulation
-- Stable tissue generation
+- Canonical automata state validation
 
-### Phase 3
+### Phase 3 — Neural Cellular Automata
+
+- Local perception
+- Shared update rule
+- Residual dynamics
+- Stochastic updates
+- Alive masking
+
+### Phase 4 — Training
 
 - Backpropagation Through Time
-- Model training
+- MSE reconstruction loss
+- Adam optimization
+- Learning-rate scheduling
+- Sample pooling
 - Checkpointing
 
-### Phase 4
+### Phase 5 — Growth and Healing
 
+- Growth simulation
 - Damage simulation
 - Self-healing experiments
-- Sledgehammer test
+- Evaluation metrics
 
-### Phase 5
+### Phase 6 — Visualization and Demonstration
 
-- GIF generation
-- MP4 rendering
-- Loss visualization
-- Healing metrics
+- GIF/MP4 generation
+- Loss and evaluation plots
+- Publication-quality figures
+- CLI and demonstration scripts
 
 ---
 
@@ -231,4 +258,4 @@ This project is intended for educational and research purposes.
 
 🚧 **Work in Progress**
 
-The project is currently under active development. Core architecture and training components are being implemented incrementally.
+Milestones 1–5 establish the configuration, data, NCA model, and training foundations. Growth experiments, healing, evaluation, visualization, and application tooling remain under development.

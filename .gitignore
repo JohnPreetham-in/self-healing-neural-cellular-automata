@@ -16,3 +16,6 @@ cache/
 temp/
 
 .DS_Store
+
+# Local canonical project context (maintained for this workspace)
+PROJECT_CONTEXT.md
